@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GS-Convert - Apple IIgs Image Converter</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🍎 GS-Convert</h1>
+            <p>Convert modern images to Apple IIgs Super High-Resolution format</p>
+        </header>
+
+        <main>
+            <!-- File Upload Section -->
+            <section class="upload-section">
+                <input type="file" id="imageUpload" accept="image/*" style="display: none;">
+                <div id="dropZone" class="drop-zone">
+                    <div class="drop-zone-content">
+                        <p class="drop-zone-icon">📁</p>
+                        <p>Drop an image here or click to select</p>
+                        <p class="drop-zone-hint">Supports PNG, JPEG, GIF, BMP, TIFF</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Image Preview Section -->
+            <section class="preview-section" id="previewSection" style="display: none;">
+                <div class="image-panel">
+                    <h3>Original Image</h3>
+                    <div class="image-container">
+                        <canvas id="originalCanvas" width="320" height="200"></canvas>
+                    </div>
+                    <p id="originalInfo" class="image-info"></p>
+                </div>
+
+                <div class="image-panel">
+                    <h3>Apple IIgs Preview</h3>
+                    <div class="image-container">
+                        <canvas id="previewCanvas" width="320" height="200"></canvas>
+                        <div id="loadingSpinner" class="loading-spinner" style="display: none;">
+                            <div class="spinner"></div>
+                            <p>Converting...</p>
+                        </div>
+                    </div>
+                    <p id="conversionInfo" class="image-info"></p>
+                </div>
+            </section>
+
+            <!-- Options Section -->
+            <section class="options-section" id="optionsSection" style="display: none;">
+                <h2>Conversion Options</h2>
+                
+                <div class="options-grid">
+                    <div class="option-group">
+                        <label for="dither">Dithering Algorithm:</label>
+                        <select id="dither" class="option-input">
+                            <option value="atkinson" selected>Atkinson (Retro Look)</option>
+                            <option value="floyd-steinberg">Floyd-Steinberg (Smooth)</option>
+                            <option value="jjn">JJN (High Quality)</option>
+                            <option value="stucki">Stucki</option>
+                            <option value="burkes">Burkes</option>
+                            <option value="ordered">Ordered (Pattern)</option>
+                            <option value="none">None (Clean/Posterized)</option>
+                        </select>
+                        <p class="option-description">How colors blend together</p>
+                    </div>
+
+                    <div class="option-group">
+                        <label for="quantize">Quantization Method:</label>
+                        <select id="quantize" class="option-input">
+                            <option value="median-cut" selected>Median Cut (Default)</option>
+                            <option value="optimized">Optimized (Reduce Banding)</option>
+                            <option value="global">Global (Animation/Graphics)</option>
+                        </select>
+                        <p class="option-description">How colors are chosen per scanline</p>
+                    </div>
+
+                    <div class="option-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="optimizePalettes">
+                            Optimize Palettes
+                        </label>
+                        <p class="option-description">Reuse palettes to reduce banding</p>
+                    </div>
+
+                    <div class="option-group">
+                        <label for="errorThreshold">Error Threshold:</label>
+                        <div class="slider-container">
+                            <input type="range" id="errorThreshold" class="option-slider" 
+                                   min="500" max="10000" value="2000" step="500">
+                            <span id="thresholdValue" class="slider-value">2000</span>
+                        </div>
+                        <p class="option-description">Higher = more palette reuse</p>
+                    </div>
+
+                    <div class="option-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="aspectCorrect" checked>
+                            Aspect Ratio Correction (1.2×)
+                        </label>
+                        <p class="option-description">Compensate for non-square pixels</p>
+                    </div>
+
+                    <div class="option-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="linearRgb" checked>
+                            Linear RGB Processing
+                        </label>
+                        <p class="option-description">Perceptually correct colors</p>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button id="convertBtn" class="btn btn-primary">
+                        Convert to Apple IIgs Format
+                    </button>
+                    <button id="downloadBtn" class="btn btn-secondary" disabled>
+                        Download .3200 File
+                    </button>
+                    <button id="resetBtn" class="btn btn-tertiary">
+                        Upload New Image
+                    </button>
+                </div>
+            </section>
+
+            <!-- Statistics Section -->
+            <section class="stats-section" id="statsSection" style="display: none;">
+                <h2>Conversion Statistics</h2>
+                <div id="stats" class="stats-grid">
+                    <div class="stat-item">
+                        <span class="stat-label">Palettes Used:</span>
+                        <span id="statPalettes" class="stat-value">-</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">File Size:</span>
+                        <span id="statFileSize" class="stat-value">-</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Dimensions:</span>
+                        <span id="statDimensions" class="stat-value">-</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Processing Time:</span>
+                        <span id="statTime" class="stat-value">-</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Error Message -->
+            <div id="errorMessage" class="error-message" style="display: none;"></div>
+        </main>
+
+        <footer>
+            <p>Apple IIgs Super High-Resolution: 320×200, 12-bit color (4096 colors), 16 colors per scanline</p>
+        </footer>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
