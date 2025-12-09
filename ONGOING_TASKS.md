@@ -1,10 +1,80 @@
 # Ongoing Tasks
 
-## Current Task: Flask Web UI Implementation
+## ✅ Completed: Flask Web UI Implementation
+
+**Status**: COMPLETE - Committed and pushed to GitHub
 
 **Goal**: Build a browser-based UI for gs-convert that provides real-time preview and easy access to all conversion options.
 
 **Approach**: Library integration (direct imports from `gs_convert` package)
+
+**Repository**: https://github.com/skeptomai/gs-convert
+
+---
+
+## Current Tasks: Post-Launch Improvements
+
+### GitHub Repository Enhancement
+
+- [ ] Add topics/tags on GitHub (apple-iigs, retro-computing, image-conversion, dithering, python)
+- [ ] Add screenshots to README.md showing the Web UI in action
+- [ ] Add example conversions (before/after images)
+- [ ] Create GitHub repository social preview image
+
+### Release Management
+
+- [ ] Create first release (v0.1.0)
+- [ ] Write release notes highlighting features
+- [ ] Tag the release in git
+
+### Community Outreach
+
+- [ ] Share on retro computing forums
+- [ ] Post on Reddit (r/retrobattlestations, r/apple2, r/vintageapple)
+- [ ] Share on social media / Mastodon / etc.
+- [ ] Add to awesome-retro-computing lists
+
+### CI/CD & Testing
+
+- [ ] Set up GitHub Actions for automated testing
+- [ ] Add pytest test suite
+- [ ] Set up code coverage reporting
+- [ ] Add pre-commit hooks
+
+### PyPI Publishing
+
+- [ ] Test installation from source
+- [ ] Create PyPI account/token
+- [ ] Publish to PyPI test server first
+- [ ] Publish official release to PyPI
+- [ ] Add installation instructions: `pip install gs-convert`
+
+### Homebrew Distribution
+
+- [ ] Create Homebrew formula
+- [ ] Test formula locally
+- [ ] Submit to homebrew-core or create tap
+- [ ] Add installation instructions: `brew install gs-convert`
+
+### Future Features (Web UI)
+
+- [ ] Real-time preview on option change (with debouncing)
+- [ ] Comparison slider (before/after)
+- [ ] Batch processing (multiple images)
+- [ ] Preset management (save favorite settings)
+- [ ] Advanced statistics (palette visualization, color histograms)
+- [ ] Export preview as PNG
+- [ ] WebSocket support for progress updates
+- [ ] Drag-to-reorder for batch processing
+
+### Future Features (Core)
+
+- [ ] Region-based priority weighting (prioritize faces over backgrounds)
+- [ ] 640×200 mode support
+- [ ] Batch optimization (share palettes across multiple images)
+- [ ] Custom palette import/export
+- [ ] Integration with disk image creation tools
+- [ ] Animation support (GIF to SHR slideshow)
 
 ---
 
