@@ -111,6 +111,26 @@
                         </label>
                         <p class="option-description">Perceptually correct colors</p>
                     </div>
+
+                    <div class="option-group">
+                        <label for="gamma">Gamma Correction:</label>
+                        <div class="slider-container">
+                            <input type="range" id="gamma" class="option-slider"
+                                   min="0.4" max="2.0" value="1.0" step="0.1">
+                            <span id="gammaValue" class="slider-value">1.0</span>
+                        </div>
+                        <p class="option-description">&lt; 1.0 = lighter, &gt; 1.0 = darker</p>
+                    </div>
+
+                    <div class="option-group">
+                        <label for="brightness">Brightness:</label>
+                        <div class="slider-container">
+                            <input type="range" id="brightness" class="option-slider"
+                                   min="0.5" max="2.0" value="1.0" step="0.1">
+                            <span id="brightnessValue" class="slider-value">1.0</span>
+                        </div>
+                        <p class="option-description">&lt; 1.0 = darker, &gt; 1.0 = lighter</p>
+                    </div>
                 </div>
 
                 <div class="button-group">

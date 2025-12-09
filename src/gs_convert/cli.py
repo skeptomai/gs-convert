@@ -70,6 +70,18 @@ def cli():
     help='Use linear RGB color space for processing (default: on)'
 )
 @click.option(
+    '--gamma', '-g',
+    type=float,
+    default=1.0,
+    help='Gamma correction (< 1.0 = lighter, > 1.0 = darker, default: 1.0)'
+)
+@click.option(
+    '--brightness', '-b',
+    type=float,
+    default=1.0,
+    help='Brightness multiplier (> 1.0 = lighter, < 1.0 = darker, default: 1.0)'
+)
+@click.option(
     '--preview', '-p',
     type=click.Path(),
     default=None,
@@ -91,6 +103,8 @@ def convert(
     aspect: float,
     resize_filter: str,
     linear: bool,
+    gamma: float,
+    brightness: float,
     preview: Optional[str],
     preset: Optional[str]
 ):
@@ -135,7 +149,9 @@ def convert(
             resize_filter=resize_filter.lower(),
             use_linear_rgb=linear,
             optimize_palettes=optimize_palettes,
-            error_threshold=error_threshold
+            error_threshold=error_threshold,
+            gamma=gamma,
+            brightness=brightness
         )
         
         # Generate preview if requested

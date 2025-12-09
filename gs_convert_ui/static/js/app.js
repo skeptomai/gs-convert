@@ -28,6 +28,10 @@ const errorThreshold = document.getElementById('errorThreshold');
 const thresholdValue = document.getElementById('thresholdValue');
 const aspectCorrect = document.getElementById('aspectCorrect');
 const linearRgb = document.getElementById('linearRgb');
+const gammaSlider = document.getElementById('gamma');
+const gammaValue = document.getElementById('gammaValue');
+const brightnessSlider = document.getElementById('brightness');
+const brightnessValue = document.getElementById('brightnessValue');
 
 // Stats elements
 const statPalettes = document.getElementById('statPalettes');
@@ -46,6 +50,12 @@ downloadBtn.addEventListener('click', handleDownload);
 resetBtn.addEventListener('click', handleReset);
 errorThreshold.addEventListener('input', function(e) {
     thresholdValue.textContent = e.target.value;
+});
+gammaSlider.addEventListener('input', function(e) {
+    gammaValue.textContent = e.target.value;
+});
+brightnessSlider.addEventListener('input', function(e) {
+    brightnessValue.textContent = e.target.value;
 });
 
 // Drag and Drop Handlers
@@ -159,7 +169,9 @@ async function handleConvert() {
             optimize_palettes: optimizePalettes.checked,
             error_threshold: parseFloat(errorThreshold.value),
             aspect_correct: aspectCorrect.checked,
-            use_linear_rgb: linearRgb.checked
+            use_linear_rgb: linearRgb.checked,
+            gamma: parseFloat(gammaSlider.value),
+            brightness: parseFloat(brightnessSlider.value)
         };
         
         const response = await fetch('/api/convert', {

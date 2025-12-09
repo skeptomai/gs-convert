@@ -138,14 +138,16 @@ def convert():
     error_threshold = float(options.get('error_threshold', 2000.0))
     aspect_correct = 1.2 if options.get('aspect_correct', True) else 1.0
     use_linear_rgb = options.get('use_linear_rgb', True)
-    
+    gamma = float(options.get('gamma', 1.0))
+    brightness = float(options.get('brightness', 1.0))
+
     # Output paths
     output_path = session_folder / "output.3200"
     preview_path = session_folder / "preview.png"
-    
+
     # Run conversion
     start_time = time.time()
-    
+
     try:
         # Run conversion
         convert_image(
@@ -156,7 +158,9 @@ def convert():
             aspect_correct=aspect_correct,
             use_linear_rgb=use_linear_rgb,
             optimize_palettes=optimize_palettes,
-            error_threshold=error_threshold
+            error_threshold=error_threshold,
+            gamma=gamma,
+            brightness=brightness
         )
 
         # Generate preview from the .3200 file

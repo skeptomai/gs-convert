@@ -2,6 +2,9 @@
 
 Convert modern high-resolution images (PNG, JPEG) to Apple IIgs Super High-Resolution (SHR) format.
 
+![Example Conversion](converted-image.png)
+*Example: Modern image converted to Apple IIgs 320×200 resolution with 16 colors per scanline*
+
 ## Features
 
 - **Multiple Dithering Algorithms**: Atkinson, Floyd-Steinberg, JJN, Stucki, Burkes, Ordered/Bayer, or none

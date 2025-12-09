@@ -25,6 +25,8 @@ def convert_image(
     use_linear_rgb: bool = True,
     optimize_palettes: bool = False,
     error_threshold: float = 2000.0,
+    gamma: float = 1.0,
+    brightness: float = 1.0,
 ) -> None:
     """
     Convert an image to Apple IIgs .3200 format.
@@ -39,11 +41,31 @@ def convert_image(
         use_linear_rgb: Use linear RGB color space for processing (recommended)
         optimize_palettes: Use intelligent palette reuse to reduce banding (recommended for solid areas)
         error_threshold: Error threshold for palette reuse (only used with optimize_palettes)
+        gamma: Gamma correction (< 1.0 = lighter, > 1.0 = darker, 1.0 = no change)
+        brightness: Brightness multiplier (> 1.0 = lighter, < 1.0 = darker, 1.0 = no change)
     """
     # Load and preprocess image
     print(f"Loading {input_path}...")
     img = load_and_resize_image(input_path, aspect_correct, resize_filter)
     pixels = np.array(img)
+
+    # Apply brightness and gamma adjustments
+    if brightness != 1.0 or gamma != 1.0:
+        print(f"Applying brightness={brightness}, gamma={gamma}...")
+        # Convert to float for adjustments
+        pixels_float = pixels.astype(np.float32) / 255.0
+
+        # Apply brightness (multiplicative)
+        if brightness != 1.0:
+            pixels_float = pixels_float * brightness
+
+        # Apply gamma correction (power curve)
+        if gamma != 1.0:
+            pixels_float = np.power(pixels_float, 1.0 / gamma)
+
+        # Clamp to valid range and convert back
+        pixels_float = np.clip(pixels_float, 0.0, 1.0)
+        pixels = (pixels_float * 255).astype(np.uint8)
 
     # Convert to linear RGB if requested
     if use_linear_rgb:
