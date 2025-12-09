@@ -66,3 +66,14 @@ examples/batch_output/
 *_preview.png
 !examples/*.3200
 !examples/*_preview.png
+
+# Test files and directories
+star_trek_tests/
+star_trek_prequant_tests/
+star_trek_animated.jpeg
+star_trek.png
+banding_*.png
+complex_*.png
+flag_*.png
+without.png
+preview.png
