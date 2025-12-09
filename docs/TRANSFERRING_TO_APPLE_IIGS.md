@@ -555,27 +555,90 @@ sudo systemctl restart netatalk
 
 Once your .3200 file is on the Apple IIgs:
 
-### Using Control Panel (GS/OS 6.0+)
+### Important: Third-Party Software Required
 
-1. **Boot into GS/OS**
+**GS/OS does not include a built-in desktop picture control panel.** You need third-party utilities to set desktop backgrounds, even on GS/OS 6.0.4.
 
-2. **Open Control Panel**
-   - Click Apple menu → Control Panels
-   - Or double-click Control Panel icon in System folder
+### Recommended Desktop Utilities
 
-3. **Select Desktop Control Panel**
-   - Look for "Desktop" or "Desktop Picture" icon
-   - Double-click to open
+**DeskMaker** (Most Popular)
+- Simple, lightweight desktop picture utility
+- Easy to use - just select your .3200 file
+- Works with GS/OS 6.0+
+- Small memory footprint
 
-4. **Set Background Image**
-   - Click "Change..." or "Select Picture..." button
-   - Navigate to your .3200 file
-   - Select it and click "Open"
-   - Desktop should update immediately
+**Spectrum** (Full-Featured)
+- Complete desktop picture manager
+- More control over desktop appearance
+- Can load multiple graphics formats (SHR, 3200, 3201)
+- Advanced options for positioning and display
+- Recommended for power users
 
-5. **Save Settings**
-   - Close Control Panel
-   - Settings are saved automatically
+**DreamGrafix** (Graphics Viewer + Desktop Setter)
+- View and convert SHR images
+- Set desktop background from within viewer
+- Supports multiple graphics formats
+- Good all-in-one solution
+
+**SuperConvert** (Converter + Desktop Setter)
+- Convert between graphics formats
+- Set as desktop background
+- Useful if you work with multiple formats
+
+### Where to Find Desktop Utilities
+
+**Asimov Archive (Most Complete):**
+```
+FTP: ftp://ftp.apple.asimov.net/pub/apple_II/images/graphics/
+Web: https://www.apple.asimov.net/
+```
+
+Look for files like:
+- `DeskMaker.shk` or `DeskMaker.bxy`
+- `Spectrum.shk` or `Spectrum.bxy`
+- `DreamGrafix.shk`
+- `SuperConvert.shk`
+
+**Internet Archive:**
+```
+https://archive.org/details/apple_ii_library
+Search for: "Apple IIgs desktop utilities" or "SHR viewer"
+```
+
+**Apple II Documentation Project:**
+```
+https://mirrors.apple2.org.za/
+Navigate to: GS Software → Graphics Utilities
+```
+
+### Installing Desktop Utilities
+
+Most utilities are distributed as ShrinkIt archives (.shk, .bxy):
+
+1. **Download the utility** (e.g., DeskMaker.shk)
+
+2. **Transfer to your IIgs** using your preferred method:
+   - Create a disk image with the utility
+   - Use the same transfer method you used for your .3200 file
+
+3. **Extract on IIgs:**
+   - You'll need **ShrinkIt GS** or **GS.Shrinkit** to extract .shk files
+   - Double-click the .shk file to extract
+   - Or use the ShrinkIt application
+
+4. **Run the utility:**
+   - Double-click the extracted application
+   - Select your .3200 file
+   - Click "Set Desktop" or similar option
+
+### Using DeskMaker (Example)
+
+1. Launch DeskMaker application
+2. Click "Select Picture..." button
+3. Navigate to your .3200 file
+4. Select it and click "Open"
+5. Desktop updates immediately
+6. Quit DeskMaker (settings persist)
 
 ### File Type Requirements
 
@@ -592,28 +655,25 @@ cp2 add mydisk.po desktop.3200 --type C0 --aux 0000
 
 **Setting with AppleCommander:**
 ```bash
-# Type and aux are parameters
-applecommander -p mydisk.po desktop.3200 C0 0000 < desktop.3200
+# Type and aux are parameters (note: requires stdin redirection)
+java -jar /path/to/AppleCommander.jar -p mydisk.po desktop.3200 C0 0000 < desktop.3200
 ```
 
 **Setting on IIgs (if wrong):**
 1. Select file in Finder
-2. Choose "Get Info" from File menu
+2. Choose "Get Info" from File menu (or Command-I)
 3. Set File Type to `$C0`
 4. Set Aux Type to `$0000`
 5. Close Info window
 
-### Alternative: Third-Party Utilities
+### Alternative: Manual Method (Advanced)
 
-**Spectrum** - Desktop picture manager
-- More control over desktop appearance
-- Can load multiple formats
-- Available on vintage software archives
+Some .3200 files with correct file types can be set by:
+1. Double-clicking the .3200 file
+2. If the system recognizes it, it may offer to set as desktop
+3. This depends on having the right application registered for $C0 files
 
-**DreamGrafix** - Graphics viewer/desktop setter
-- View and set SHR images
-- Supports multiple graphics formats
-- Classic shareware
+However, **using a dedicated utility like DeskMaker is more reliable.**
 
 ### Troubleshooting
 
@@ -621,10 +681,12 @@ applecommander -p mydisk.po desktop.3200 C0 0000 < desktop.3200
 |---------|----------|
 | Desktop picture doesn't appear | Verify file type ($C0), ensure exactly 32,768 bytes |
 | Image corrupted/garbled | Re-transfer file, check for transfer errors |
-| Can't find Desktop control panel | Update to GS/OS 6.0.1+, check System folder |
-| Out of memory error | Close applications, need 1MB+ RAM |
+| Can't find desktop utility | Download from Asimov archive, need DeskMaker or Spectrum |
+| Can't extract .shk file | Need ShrinkIt GS to extract ShrinkIt archives |
+| Out of memory error | Close applications, need 1MB+ RAM for desktop pictures |
 | Colors look wrong | Re-convert with different quantization method |
 | Image too dark | Re-convert with `--gamma 0.7` or `--brightness 1.3` |
+| Desktop resets after reboot | Desktop utility may need to be in Startup folder |
 
 ---
 
