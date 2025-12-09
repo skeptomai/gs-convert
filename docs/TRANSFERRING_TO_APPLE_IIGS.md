@@ -3,325 +3,844 @@
 ## Overview
 
 After creating .3200 files with gs-convert, you need to:
-1. Transfer the file to your Apple IIgs
-2. Set it as your desktop background in GS/OS
+1. Create a ProDOS disk image containing your file
+2. Transfer the image to your Apple IIgs (or emulator)
+3. Set it as your desktop background in GS/OS
 
-## Part 1: Transfer Methods
+This guide covers all major platforms: **Windows, macOS (Intel & Apple Silicon), and Linux**.
+
+---
+
+## Part 1: Disk Image Tools
+
+Before transferring to hardware, you need to create ProDOS disk images. Here are the best cross-platform tools:
+
+### Tool Comparison
+
+| Tool | Windows | macOS Intel | macOS Apple Silicon | Linux | GUI | CLI | Recommendation |
+|------|---------|-------------|---------------------|-------|-----|-----|----------------|
+| **CiderPress II** | ✅ | ✅ | ✅ CLI only | ✅ | Windows only | ✅ | Best modern tool |
+| **AppleCommander** | ✅ | ✅ | ✅ Native | ✅ | ✅ | ✅ | Easiest cross-platform |
+| **Cadius** | ✅ | ✅ | Compile | ✅ | ❌ | ✅ | Legacy but reliable |
+| **CiderPress (original)** | ✅ | ⚠️ Rosetta | ⚠️ Rosetta | ❌ | ✅ | ❌ | Windows only (native) |
+
+---
+
+## Installing Disk Image Tools
+
+### CiderPress II
+
+**The modern successor to CiderPress with excellent cross-platform support.**
+
+#### Windows
+```powershell
+# Download from GitHub releases
+# https://github.com/fadden/CiderPress2/releases
+
+# Extract and add to PATH, or run directly
+cp2.exe --help
+```
+
+#### macOS (Intel & Apple Silicon)
+```bash
+# CLI version runs natively on Apple Silicon via .NET
+# Download from https://github.com/fadden/CiderPress2/releases
+
+# Make executable
+chmod +x cp2
+./cp2 --help
+
+# Optional: move to /usr/local/bin for system-wide access
+sudo mv cp2 /usr/local/bin/
+```
+
+#### Linux
+```bash
+# Download from GitHub releases
+wget https://github.com/fadden/CiderPress2/releases/latest/download/cp2-linux-x64.zip
+unzip cp2-linux-x64.zip
+chmod +x cp2
+sudo mv cp2 /usr/local/bin/
+
+# Or use .NET SDK
+dotnet tool install -g CiderPress2
+```
+
+**CiderPress II Common Commands:**
+```bash
+# Create new ProDOS disk
+cp2 create-disk-image mydisk.po 800kb prodos
+
+# Add file with ProDOS type
+cp2 add mydisk.po yourimage.3200 --type C0 --aux 0000
+
+# List contents
+cp2 list mydisk.po
+
+# Extract all files
+cp2 extract mydisk.po
+
+# Get detailed info
+cp2 disk-info mydisk.po
+```
+
+---
+
+### AppleCommander
+
+**Java-based, works everywhere Java runs. Great for scripting.**
+
+#### Windows
+```powershell
+# Option 1: Download JAR from GitHub
+# https://github.com/AppleCommander/AppleCommander/releases
+
+# Run directly
+java -jar AppleCommander-win64-1.9.0.jar
+
+# Or use the native .exe wrapper
+AppleCommander-win64-1.9.0.exe
+```
+
+#### macOS (Intel)
+```bash
+# Using Homebrew
+brew install applecommander
+
+# Or download JAR
+curl -LO https://github.com/AppleCommander/AppleCommander/releases/latest/download/AppleCommander-macos-x86_64.jar
+java -jar AppleCommander-macos-x86_64.jar
+```
+
+#### macOS (Apple Silicon - M1/M2/M3/M4)
+```bash
+# Using Homebrew (RECOMMENDED - native ARM support)
+brew install applecommander
+
+# Or download native ARM JAR
+curl -LO https://github.com/AppleCommander/AppleCommander/releases/latest/download/AppleCommander-macos-aarch64.jar
+java -jar AppleCommander-macos-aarch64.jar
+
+# Verify native
+file AppleCommander-macos-aarch64.jar  # Should show ARM64
+```
+
+#### Linux
+```bash
+# Download appropriate architecture
+# x86_64:
+wget https://github.com/AppleCommander/AppleCommander/releases/latest/download/AppleCommander-linux-x86_64.jar
+
+# ARM64 (Raspberry Pi, etc):
+wget https://github.com/AppleCommander/AppleCommander/releases/latest/download/AppleCommander-linux-aarch64.jar
+
+# Make wrapper script
+echo '#!/bin/bash' > applecommander
+echo 'java -jar /usr/local/share/AppleCommander.jar "$@"' >> applecommander
+chmod +x applecommander
+sudo mv applecommander /usr/local/bin/
+```
+
+**AppleCommander Common Commands:**
+```bash
+# Create new ProDOS disk
+applecommander -pro mydisk.po MYDISK 800KB
+
+# Add file (must use stdin redirection)
+applecommander -p mydisk.po yourimage.3200 C0 0000 < yourimage.3200
+
+# List contents
+applecommander -l mydisk.po
+
+# Extract file
+applecommander -g mydisk.po yourimage.3200
+
+# Detailed catalog
+applecommander -ll mydisk.po
+```
+
+---
+
+### Cadius
+
+**Command-line only, part of Brutal Deluxe's Cross Development Tools.**
+
+#### Windows
+```powershell
+# Download from Brutal Deluxe
+# https://www.brutaldeluxe.fr/products/crossdevtools/cadius/
+
+# Extract Cadius.exe to your PATH
+cadius.exe HELP
+```
+
+#### macOS (Intel)
+```bash
+# Using maintained fork (recommended)
+git clone https://github.com/mach-kernel/cadius.git
+cd cadius
+make
+sudo cp cadius /usr/local/bin/
+
+# Or download binary from Brutal Deluxe site
+```
+
+#### macOS (Apple Silicon)
+```bash
+# Compile from source (uses native ARM compiler)
+git clone https://github.com/mach-kernel/cadius.git
+cd cadius
+make clean
+make CC=clang
+sudo cp cadius /usr/local/bin/
+
+# Verify native
+file cadius  # Should show arm64
+```
+
+#### Linux
+```bash
+# Compile from source
+git clone https://github.com/mach-kernel/cadius.git
+cd cadius
+make
+sudo make install
+
+# Or use Docker
+docker run -v $(pwd):/data mach-kernel/cadius --help
+```
+
+**Cadius Common Commands:**
+```bash
+# Create new ProDOS volume
+CADIUS CREATEVOLUME mydisk.po MYDISK 800KB
+
+# Add file
+CADIUS ADDFILE mydisk.po /MYDISK yourimage.3200
+
+# Set file type
+CADIUS CHANGETYPE mydisk.po /MYDISK/YOURIMAGE.3200 C0 0000
+
+# List contents
+CADIUS CATALOG mydisk.po
+
+# Extract file
+CADIUS EXTRACTFILE mydisk.po /MYDISK/YOURIMAGE.3200 ./
+```
+
+---
+
+## Part 2: Transfer Methods
 
 ### Method 1: Emulator (Easiest for Testing)
 
-**GSport / GSPlus:**
-1. Create a ProDOS disk image:
-   ```bash
-   # Using CiderPress (macOS/Windows/Linux)
-   ciderpress -create mydisk.po 800k prodos
-   ciderpress -add mydisk.po yourimage.3200
-   ```
+Test your images in an emulator before transferring to real hardware.
 
-2. In GSport config, mount the disk image
-3. Boot GS/OS and access the mounted disk
+#### GSport / GSPlus
 
-**MAME:**
-1. Place .3200 file in a folder accessible to MAME
-2. Use MAME's file manager to copy to virtual disk
+**Windows:**
+```powershell
+# Download GSport: https://apple2.gs/
+# Create disk with CiderPress II
+cp2 create-disk-image transfer.po 800kb prodos
+cp2 add transfer.po desktop.3200 --type C0 --aux 0000
+
+# Edit GSport config to mount transfer.po
+# Start GSport
+```
+
+**macOS:**
+```bash
+# GSport works on Intel Macs
+# For Apple Silicon, use UTM with emulation
+
+# Create disk
+cp2 create-disk-image transfer.po 800kb prodos
+cp2 add transfer.po desktop.3200 --type C0 --aux 0000
+
+# Launch GSport and mount transfer.po
+```
+
+**Linux:**
+```bash
+# Install GSport
+sudo apt install gsport  # Debian/Ubuntu
+# or build from source
+
+# Create and mount disk
+cp2 create-disk-image transfer.po 800kb prodos
+cp2 add transfer.po desktop.3200 --type C0 --aux 0000
+gsport
+```
+
+#### MAME (Multi-platform)
+
+**All platforms:**
+```bash
+# Install MAME
+# Windows: https://www.mamedev.org/
+# Mac: brew install mame
+# Linux: sudo apt install mame
+
+# Run Apple IIgs
+mame apple2gs -flop3 transfer.po
+```
+
+---
 
 ### Method 2: ADTPro (Audio/Serial Transfer to Real Hardware)
 
-**ADTPro** is the most popular method for transferring to real Apple IIgs hardware.
+**ADTPro works on all platforms and is the most popular method for transferring to real Apple IIgs hardware.**
 
-**Requirements:**
-- Modern computer with audio output or USB-serial adapter
+#### Requirements
+- Modern computer (Windows/Mac/Linux)
 - Apple IIgs with working disk drive
-- Audio cable or serial cable
+- Audio cable (3.5mm) OR USB-serial adapter
 - ADTPro software (free)
 
-**Steps:**
+#### Installation
 
-1. **Download ADTPro**: http://adtpro.com/
+**Windows:**
+```powershell
+# Download from http://adtpro.com/
+# Extract ADTPro-2.1.0.zip
+cd ADTPro-2.1.0
+# Run ADTPro.bat
+```
 
-2. **Create ADTPro boot disk**:
-   - Download the ADTPro disk image
-   - Write to a real 3.5" or 5.25" floppy using:
-     - **Greaseweazle** (best option for Mac/PC)
-     - **Applesauce**
-     - **Kryoflux**
-     - Or an older PC with real floppy drive
+**macOS:**
+```bash
+# Download from http://adtpro.com/
+curl -LO http://adtpro.com/releases/ADTPro-2.1.0.dmg
+# Mount DMG and copy to Applications
+# Or extract .zip version
+```
 
-3. **Connect Apple IIgs**:
-   - **Audio method**: 3.5mm audio cable from computer headphone jack to IIgs cassette input
-   - **Serial method**: USB-serial adapter to IIgs modem or printer port
+**Linux:**
+```bash
+# Download
+wget http://adtpro.com/releases/ADTPro-2.1.0.tar.gz
+tar xzf ADTPro-2.1.0.tar.gz
+cd ADTPro-2.1.0
 
-4. **Boot IIgs with ADTPro disk**
+# Run server
+./adtpro.sh
+```
 
-5. **On modern computer**:
-   - Run ADTPro server
-   - Create a new .po (ProDOS) disk image
-   - Add your .3200 file to the image
-   - Send the entire disk image to IIgs via ADTPro
+#### Creating ADTPro Boot Disk
 
-6. **On IIgs**:
-   - Receive the disk image
-   - Write it to a physical floppy
-   - Reboot with that disk
+You need to write the ADTPro client disk to a physical floppy for your IIgs:
+
+**Option A: Using Greaseweazle (recommended)**
+```bash
+# All platforms - Greaseweazle is best modern option
+# https://github.com/keirf/greaseweazle
+
+# Download ADTPro-2.1.0-140.dsk
+# Write to 5.25" floppy:
+gw write --format apple2.dos33 ADTPro-2.1.0-140.dsk
+
+# Or 3.5" version:
+# Download ADTPro-2.1.0.po
+gw write --format apple2.prodos.800 ADTPro-2.1.0.po
+```
+
+**Option B: Using Applesauce**
+```bash
+# macOS/Windows - Commercial but excellent
+# https://applesaucefdc.com/
+
+# Use GUI to write ADTPro disk image
+```
+
+**Option C: Older PC with floppy drive**
+```bash
+# Windows with native floppy controller
+# Use ADTPro's built-in disk writer
+# Or use WinImage
+```
+
+#### Using ADTPro
+
+**1. Connect Hardware:**
+
+Audio method (slower, easier):
+```
+Computer headphone jack → 3.5mm cable → IIgs cassette input port
+```
+
+Serial method (faster, requires adapter):
+```
+Computer USB → USB-Serial adapter → IIgs modem or printer port
+```
+
+**2. On Modern Computer:**
+
+**Windows:**
+```powershell
+cd ADTPro-2.1.0
+ADTPro.bat
+
+# In ADTPro window:
+# - Select Audio or Serial
+# - Configure COM port (if serial)
+# - Wait for IIgs to connect
+```
+
+**macOS/Linux:**
+```bash
+cd ADTPro-2.1.0
+./adtpro.sh
+
+# In ADTPro window:
+# - Select /dev/cu.usbserial (Mac) or /dev/ttyUSB0 (Linux) for serial
+# - Or select audio
+```
+
+**3. On Apple IIgs:**
+- Boot with ADTPro client disk
+- Choose Audio or Serial mode to match computer
+- Wait for connection
+- Use ADTPro client to receive disk images
+
+**4. Prepare Disk Image:**
+
+**All platforms:**
+```bash
+# Create transfer disk with your image
+cp2 create-disk-image transfer.po 800kb prodos
+cp2 add transfer.po desktop.3200 --type C0 --aux 0000
+
+# In ADTPro server:
+# - Select "Send"
+# - Choose transfer.po
+# - IIgs will receive and write to floppy
+```
+
+---
 
 ### Method 3: CompactFlash / SD Card (Modern Storage)
 
-If your Apple IIgs has a **CFFA3000** or **BOOTI** card:
+If your Apple IIgs has a **CFFA3000**, **BOOTI**, or **Focus IDE** card with CF/SD adapter:
 
-1. Format CF/SD card as ProDOS on your modern computer using **CiderPress**
+#### Windows
 
-2. Create a folder on the card:
-   ```
-   /IMAGES/
-     yourimage.3200
-   ```
+**Using CiderPress II:**
+```powershell
+# Create large ProDOS volume
+cp2 create-disk-image cfcard.po 32mb prodos
 
-3. Insert card into IIgs
+# Add your images
+cp2 add cfcard.po desktop.3200 --type C0 --aux 0000
+cp2 add cfcard.po photo1.3200 --type C0 --aux 0000
 
-4. Boot GS/OS and browse to the IMAGES folder
+# Write to CF card
+# Use Win32DiskImager or dd for Windows
+dd if=cfcard.po of=\\.\PhysicalDrive1 bs=512
+```
+
+#### macOS
+
+```bash
+# Create volume
+cp2 create-disk-image cfcard.po 32mb prodos
+
+# Add files
+cp2 add cfcard.po desktop.3200 --type C0 --aux 0000
+
+# Find CF card
+diskutil list
+
+# Unmount (not eject!)
+diskutil unmountDisk /dev/disk2
+
+# Write image
+sudo dd if=cfcard.po of=/dev/rdisk2 bs=512
+
+# Eject
+diskutil eject /dev/disk2
+```
+
+#### Linux
+
+```bash
+# Create volume
+cp2 create-disk-image cfcard.po 32mb prodos
+
+# Add files
+cp2 add cfcard.po desktop.3200 --type C0 --aux 0000
+
+# Find device
+lsblk
+
+# Unmount if auto-mounted
+sudo umount /dev/sdb*
+
+# Write image
+sudo dd if=cfcard.po of=/dev/sdb bs=512 status=progress
+
+# Eject
+sudo eject /dev/sdb
+```
+
+**Note**: Always unmount before writing with dd, and be VERY careful with device names!
+
+---
 
 ### Method 4: Floppy Disk (If You Have the Hardware)
 
-**If you have a modern computer with a floppy drive:**
+Modern USB floppy drives **DO NOT WORK** with Apple II disks. You need:
 
-1. **Write ProDOS disk image**:
-   ```bash
-   # Create disk image
-   ciderpress -create transfer.po 800k prodos
-   ciderpress -add transfer.po yourimage.3200
+- Greaseweazle (~$20 DIY)
+- Applesauce (~$100)
+- Kryoflux (~$100+)
+- Or old PC with native floppy controller
 
-   # Write to physical disk (macOS example)
-   dd if=transfer.po of=/dev/rdisk2 bs=512
-   ```
+**Using Greaseweazle (all platforms):**
+```bash
+# Install Greaseweazle CLI
+pip install greaseweazle
 
-2. **Insert disk in Apple IIgs**
+# Create disk image
+cp2 create-disk-image transfer.po 800kb prodos
+cp2 add transfer.po desktop.3200 --type C0 --aux 0000
 
-**Note**: Modern USB floppy drives typically DON'T work with Apple II disks. You need:
-- An older PC with native floppy controller
-- A Greaseweazle/Applesauce device
-- Or a vintage Mac with SuperDrive
+# Write to 3.5" disk
+gw write --format apple2.prodos.800 transfer.po
 
-### Method 5: Ethernet (If You Have AppleTalk/EtherTalk)
-
-If your IIgs has an Uthernet II or other Ethernet card:
-
-1. Set up **netatalk** on a Linux/Mac server
-2. Configure AppleTalk file sharing
-3. Connect IIgs to network
-4. Access shared folder from GS/OS Finder
-5. Copy files directly
+# Or write to 5.25" disk (convert to DOS 3.3 first)
+# Note: .3200 files require ProDOS, so 3.5" disk recommended
+```
 
 ---
 
-## Part 2: Setting Desktop Background in GS/OS
+### Method 5: Ethernet (If You Have AppleTalk/EtherTalk Card)
 
-Once your .3200 file is on the Apple IIgs, here's how to set it as desktop background:
+If your IIgs has **Uthernet II** or other Ethernet card:
 
-### Using Control Panel
+#### Setting Up Netatalk Server
 
-**GS/OS System 6.0+:**
-
-1. Boot into GS/OS
-
-2. Open **Control Panel** from the Apple menu or Launcher
-
-3. Select **Desktop** control panel
-
-4. Look for **Desktop Pattern** or **Desktop Picture** option
-
-5. Click **Change...** or **Select...**
-
-6. Navigate to your .3200 file
-
-7. Select it and click **Open** or **OK**
-
-8. The desktop should update immediately
-
-### File Naming Convention
-
-GS/OS expects specific file types. Your .3200 file should have:
-
-- **ProDOS file type**: `$C0` (SHR 320 mode uncompressed)
-- **Auxiliary type**: `$0000`
-
-To set these attributes:
-
-**Using CiderPress (before transfer):**
+**macOS:**
 ```bash
-# Set file type when adding to disk image
-ciderpress -add mydisk.po yourimage.3200 -type C0 -aux 0000
+# Install Netatalk
+brew install netatalk
+
+# Configure /usr/local/etc/afp.conf
+# Share a folder accessible to IIgs
 ```
 
-**On GS/OS (using System Utilities):**
+**Linux (Raspberry Pi, server, etc):**
+```bash
+# Install Netatalk 3
+sudo apt install netatalk
+
+# Edit /etc/netatalk/afp.conf
+[APPLE2]
+  path = /home/pi/apple2share
+  valid users = pi
+
+# Restart service
+sudo systemctl restart netatalk
+```
+
+**On IIgs:**
+- Install TCP/IP stack (Marinetti)
+- Configure network settings
+- Use AppleShare client to connect
+- Copy files directly
+
+---
+
+## Part 3: Setting Desktop Background in GS/OS
+
+Once your .3200 file is on the Apple IIgs:
+
+### Using Control Panel (GS/OS 6.0+)
+
+1. **Boot into GS/OS**
+
+2. **Open Control Panel**
+   - Click Apple menu → Control Panels
+   - Or double-click Control Panel icon in System folder
+
+3. **Select Desktop Control Panel**
+   - Look for "Desktop" or "Desktop Picture" icon
+   - Double-click to open
+
+4. **Set Background Image**
+   - Click "Change..." or "Select Picture..." button
+   - Navigate to your .3200 file
+   - Select it and click "Open"
+   - Desktop should update immediately
+
+5. **Save Settings**
+   - Close Control Panel
+   - Settings are saved automatically
+
+### File Type Requirements
+
+Your .3200 file MUST have correct ProDOS attributes:
+
+- **File Type**: `$C0` (SHR 320 mode)
+- **Aux Type**: `$0000`
+
+**Setting with CiderPress II:**
+```bash
+# When adding file
+cp2 add mydisk.po desktop.3200 --type C0 --aux 0000
+```
+
+**Setting with AppleCommander:**
+```bash
+# Type and aux are parameters
+applecommander -p mydisk.po desktop.3200 C0 0000 < desktop.3200
+```
+
+**Setting on IIgs (if wrong):**
 1. Select file in Finder
-2. Choose **Get Info** from File menu
-3. Set **File Type** to `$C0`
-4. Set **Aux Type** to `$0000`
+2. Choose "Get Info" from File menu
+3. Set File Type to `$C0`
+4. Set Aux Type to `$0000`
+5. Close Info window
 
-### Alternative: Desktop Manager
+### Alternative: Third-Party Utilities
 
-Some third-party utilities exist for managing desktop pictures:
+**Spectrum** - Desktop picture manager
+- More control over desktop appearance
+- Can load multiple formats
+- Available on vintage software archives
 
-- **Spectrum** - Desktop picture manager
-- **NinjaForce Desktop** - Alternative desktop manager
-- **DreamGrafix** - Advanced graphics viewer/setter
+**DreamGrafix** - Graphics viewer/desktop setter
+- View and set SHR images
+- Supports multiple graphics formats
+- Classic shareware
 
 ### Troubleshooting
 
-**Desktop picture doesn't appear:**
-- Verify file type is `$C0` (SHR 320)
-- Ensure file is exactly 32,768 bytes
-- Try rebooting GS/OS
-- Make sure you have enough RAM (1MB+ recommended)
-
-**Image appears corrupted:**
-- Verify transfer completed successfully
-- Check file size is exactly 32,768 bytes
-- Try re-transferring
-
-**Can't find Desktop control panel:**
-- Ensure you're running GS/OS 6.0 or later
-- Some earlier versions may not support desktop pictures
-- Try a third-party utility
+| Problem | Solution |
+|---------|----------|
+| Desktop picture doesn't appear | Verify file type ($C0), ensure exactly 32,768 bytes |
+| Image corrupted/garbled | Re-transfer file, check for transfer errors |
+| Can't find Desktop control panel | Update to GS/OS 6.0.1+, check System folder |
+| Out of memory error | Close applications, need 1MB+ RAM |
+| Colors look wrong | Re-convert with different quantization method |
+| Image too dark | Re-convert with `--gamma 0.7` or `--brightness 1.3` |
 
 ---
 
-## Quick Reference: File Specifications
+## Part 4: Complete Workflows by Platform
 
-**For GS/OS Desktop Background:**
-- **Format**: .3200 (SHR 320 mode)
+### Windows Workflow
+
+```powershell
+# 1. Install tools
+# Download CiderPress II or AppleCommander
+
+# 2. Create your image
+gs-convert convert photo.jpg desktop.3200 --gamma 0.8 --preview preview.png
+
+# 3. Create disk image
+cp2 create-disk-image transfer.po 800kb prodos
+
+# 4. Add file with correct type
+cp2 add transfer.po desktop.3200 --type C0 --aux 0000
+
+# 5. Verify
+cp2 list transfer.po
+
+# 6. Transfer via:
+# - GSport emulator (mount transfer.po)
+# - ADTPro (send to IIgs)
+# - Write to CF card with Win32DiskImager
+```
+
+### macOS (Intel) Workflow
+
+```bash
+# 1. Install tools
+brew install applecommander
+
+# 2. Create image
+gs-convert convert photo.jpg desktop.3200 --gamma 0.8 --preview preview.png
+
+# 3. Create disk
+applecommander -pro transfer.po TRANSFER 800KB
+
+# 4. Add file
+applecommander -p transfer.po desktop.3200 C0 0000 < desktop.3200
+
+# 5. Verify
+applecommander -l transfer.po
+
+# 6. Transfer via emulator, ADTPro, or CF card
+```
+
+### macOS (Apple Silicon M1/M2/M3) Workflow
+
+```bash
+# 1. Install tools (native ARM support!)
+brew install applecommander
+
+# 2. Create image
+gs-convert convert photo.jpg desktop.3200 --gamma 0.8 --preview preview.png
+
+# 3. Create disk (runs natively on Apple Silicon)
+applecommander -pro transfer.po TRANSFER 800KB
+
+# 4. Add file
+applecommander -p transfer.po desktop.3200 C0 0000 < desktop.3200
+
+# 5. Verify
+applecommander -l transfer.po
+
+# 6. Transfer options:
+# - MAME (Apple Silicon native)
+# - ADTPro (runs natively)
+# - CF card (native dd command)
+```
+
+### Linux Workflow
+
+```bash
+# 1. Install tools
+# Option A: CiderPress II
+wget https://github.com/fadden/CiderPress2/releases/latest/download/cp2-linux-x64.zip
+unzip cp2-linux-x64.zip
+sudo mv cp2 /usr/local/bin/
+
+# Option B: AppleCommander
+wget https://github.com/AppleCommander/AppleCommander/releases/latest/download/AppleCommander-linux-x86_64.jar
+# Create wrapper script
+
+# 2. Create image
+gs-convert convert photo.jpg desktop.3200 --gamma 0.8 --preview preview.png
+
+# 3. Create disk
+cp2 create-disk-image transfer.po 800kb prodos
+
+# 4. Add file
+cp2 add transfer.po desktop.3200 --type C0 --aux 0000
+
+# 5. Verify
+cp2 list transfer.po
+
+# 6. Transfer via MAME, ADTPro, or Greaseweazle
+```
+
+---
+
+## Part 5: Quick Reference
+
+### File Specifications for Desktop Background
+
+- **Format**: .3200 (SHR 320 mode uncompressed)
 - **Size**: Exactly 32,768 bytes
 - **ProDOS Type**: $C0
 - **Aux Type**: $0000
 - **Resolution**: 320×200 pixels
 - **Colors**: 16 per scanline (up to 16 palettes)
 
----
+### Recommended Tool Combinations
 
-## Testing with Emulator First
+**For Beginners:**
+- **Windows**: CiderPress II GUI + ADTPro
+- **Mac**: AppleCommander + ADTPro
+- **Linux**: CiderPress II CLI + ADTPro
 
-**Recommended workflow:**
+**For Advanced Users:**
+- **Windows**: Cadius (scripting) + CF card
+- **Mac**: AppleCommander (Homebrew) + CF card
+- **Linux**: cp2 (automation) + Greaseweazle
 
-1. **Create image** with gs-convert:
-   ```bash
-   gs-convert convert photo.jpg desktop.3200 --preview preview.png
-   ```
-
-2. **Test in emulator** (GSport):
-   - Create disk image with CiderPress
-   - Add .3200 file
-   - Boot GS/OS in emulator
-   - Set as desktop background
-   - Verify it looks good
-
-3. **Transfer to real hardware** once confirmed
-
-This saves time and physical media!
+**For Apple Silicon Mac Users:**
+- **AppleCommander** (native ARM) + ADTPro
+- Or **CiderPress II CLI** (native via .NET)
 
 ---
 
-## Recommended Tools
+## Part 6: Essential Downloads
 
-### Essential:
-- **CiderPress** - Disk image creation/management
-  - http://ciderpress.sourceforge.net/
-- **ADTPro** - File transfer to real hardware
-  - http://adtpro.com/
-- **GSport** or **MAME** - Emulator for testing
-  - https://apple2.gs/
+### Disk Image Tools
+- **CiderPress II**: https://github.com/fadden/CiderPress2/releases
+- **AppleCommander**: https://applecommander.github.io/
+- **Cadius**: https://www.brutaldeluxe.fr/products/crossdevtools/cadius/
+- **CiderPress (original)**: http://a2ciderpress.com/
 
-### Optional:
-- **Greaseweazle** - Modern floppy imaging device
-  - https://github.com/keirf/greaseweazle
-- **Applesauce** - Professional floppy imaging
-  - https://applesaucefdc.com/
+### Transfer Software
+- **ADTPro**: http://adtpro.com/
+- **Greaseweazle**: https://github.com/keirf/greaseweazle
+- **Applesauce**: https://applesaucefdc.com/
 
----
+### Emulators
+- **GSport**: https://apple2.gs/
+- **MAME**: https://www.mamedev.org/
+- **Ample** (Modern Mac): https://github.com/ksherlock/ample
 
-## Common Workflows
-
-### Workflow 1: Test in Emulator
-```bash
-# 1. Create image
-gs-convert convert photo.jpg desktop.3200 --gamma 0.8 --preview preview.png
-
-# 2. Create disk image
-ciderpress -create test.po 800k prodos
-
-# 3. Add file with correct type
-ciderpress -add test.po desktop.3200 -type C0 -aux 0000
-
-# 4. Mount test.po in GSport
-# 5. Boot GS/OS and set desktop background
-```
-
-### Workflow 2: Transfer to Real IIgs via ADTPro
-```bash
-# 1. Create image
-gs-convert convert photo.jpg desktop.3200 --gamma 0.8
-
-# 2. Create disk image
-ciderpress -create mydisk.po 800k prodos
-ciderpress -add mydisk.po desktop.3200 -type C0 -aux 0000
-
-# 3. Use ADTPro to send mydisk.po to IIgs
-# 4. On IIgs, receive and write to floppy
-# 5. Set as desktop background
-```
-
-### Workflow 3: Modern Storage (CF Card)
-```bash
-# 1. Create image
-gs-convert convert photo.jpg desktop.3200 --gamma 0.8
-
-# 2. Format CF card as ProDOS
-ciderpress -create cfcard.po 32m prodos
-
-# 3. Add file
-ciderpress -add cfcard.po desktop.3200 -type C0 -aux 0000
-
-# 4. Write cfcard.po to physical CF card
-dd if=cfcard.po of=/dev/rdiskN bs=512
-
-# 5. Insert in IIgs with CFFA3000
-```
+### Hardware
+- **CFFA3000**: https://dreher.net/?s=projects/CFforAppleII
+- **BOOTI**: https://gitlab.com/neurogenesis/booti
+- **Uthernet II**: https://a2retrosystems.com/
 
 ---
 
-## Additional Resources
+## Part 7: Community Resources
 
-- **Apple IIgs System 6.0.1**: Required for desktop picture support
-- **GS/OS Reference Manual**: Detailed file type information
-- **Apple II Enthusiasts Facebook Group**: Active community for help
-- **comp.sys.apple2**: Usenet newsgroup (still active!)
-- **AppleFritter Forums**: Vintage Apple discussion
+### Forums & Help
+- **r/apple2** (Reddit): Active community
+- **AppleFritter Forums**: https://www.applefritter.com/
+- **comp.sys.apple2** (Usenet): Still active!
+- **Vintage Computer Federation Discord**: Large community
+
+### Software Archives
+- **Asimov**: ftp://ftp.apple.asimov.net/
+- **Internet Archive Apple II Collection**: https://archive.org/details/apple_ii_library
+- **Apple II Documentation Project**: https://mirrors.apple2.org.za/
+
+### Hardware Resources
+- **ReActiveMicro**: Modern Apple II hardware
+- **A2Heaven**: European supplier
+- **The Brewing Academy**: Hardware mods and upgrades
 
 ---
 
 ## Notes
 
-- Desktop pictures consume RAM - ensure you have at least 1MB
-- Some desktop patterns/colors may affect picture visibility
-- Not all GS/OS versions support desktop pictures
-- Third-party utilities may offer more flexibility
-- Always test in emulator first to save time and media
+- Always test in an emulator first before transferring to real hardware
+- Desktop pictures require GS/OS 6.0+ and at least 1MB RAM
+- Keep backup copies of your disk images
+- Be patient with ADTPro audio transfers (very slow but reliable)
+- Serial transfers with ADTPro are much faster than audio
+- CF cards are the most convenient modern storage solution
+- Greaseweazle is the best modern solution for writing real floppies
+- The Apple IIgs community is very helpful - don't hesitate to ask!
 
 ---
 
-## Troubleshooting Guide
+## Platform-Specific Tips
 
-| Problem | Solution |
-|---------|----------|
-| File won't transfer | Check cable connections, try different ADTPro mode |
-| Desktop picture corrupted | Verify file size (32768 bytes), check file type ($C0) |
-| Can't see Desktop option | Update to GS/OS 6.0+, check Control Panel presence |
-| Image too dark | Re-convert with `--gamma 0.7` or `--brightness 1.3` |
-| Colors look wrong | Try different quantization method (`--quantize global`) |
-| Transfer very slow | ADTPro audio can be slow, consider serial or modern storage |
+### Windows
+- Use CiderPress II GUI for easiest experience
+- ADTPro works great with USB-serial adapters
+- Win32DiskImager for writing CF cards
+
+### macOS Intel
+- Everything works via Rosetta if needed
+- Homebrew makes tool installation easy
+- Native apps available for most tools
+
+### macOS Apple Silicon
+- Use Homebrew for native ARM tools
+- AppleCommander has native M1/M2/M3 support
+- CiderPress II CLI is native via .NET
+- MAME has Apple Silicon builds
+- ADTPro runs natively
+
+### Linux
+- Most tools compile from source easily
+- Great for automation and scripting
+- Raspberry Pi makes excellent ADTPro server
+- Native ARM support for ARM-based Linux
 
 ---
 
-For more help, the Apple IIgs community is very active and helpful:
-- Reddit: r/apple2
-- Discord: Vintage Computer Federation
-- Forums: AppleFritter.com
+Happy converting! Your Apple IIgs desktop is about to look amazing! 🍎✨
