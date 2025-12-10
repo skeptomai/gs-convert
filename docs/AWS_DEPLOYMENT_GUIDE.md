@@ -760,6 +760,34 @@ sudo netstat -tlnp | grep 5001
 sudo tail -f /var/log/nginx/error.log
 ```
 
+### Static Files Not Loading (CSS/JS)
+
+**Symptoms:** Page loads but no styling, drag-and-drop doesn't work, browser console shows 403 errors for static files
+
+**Cause:** Nginx (www-data user) can't access `/home/ubuntu/` directory
+
+**Fix:**
+```bash
+# Add www-data to ubuntu group
+sudo usermod -a -G ubuntu www-data
+
+# Make home directory group-readable
+sudo chmod 755 /home/ubuntu
+
+# Restart Nginx
+sudo systemctl restart nginx
+
+# Verify static files are now accessible
+curl -I http://localhost/static/js/app.js
+# Should see: HTTP/1.1 200 OK
+```
+
+**Check Nginx error log for permission errors:**
+```bash
+sudo tail -20 /var/log/nginx/error.log
+# Look for: "Permission denied" errors when accessing /home/ubuntu/gs-convert/gs_convert_ui/static/
+```
+
 ### Can't Connect via HTTPS
 
 ```bash

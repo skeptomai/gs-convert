@@ -149,6 +149,12 @@ sudo ln -sf /etc/nginx/sites-available/gs-convert /etc/nginx/sites-enabled/
 echo "✅ Testing Nginx configuration..."
 sudo nginx -t
 
+echo "🔐 Fixing static file permissions for Nginx..."
+# Add www-data to ubuntu group so Nginx can read static files
+sudo usermod -a -G ubuntu www-data
+# Make home directory readable by group (needed for Nginx to traverse path)
+sudo chmod 755 /home/ubuntu
+
 echo "🔄 Restarting Nginx..."
 sudo systemctl restart nginx
 

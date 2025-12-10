@@ -355,6 +355,33 @@ crontab -l
 tail -f /var/log/gs-convert/cleanup.log
 ```
 
+### Static Files Not Loading (403 Forbidden)
+
+**Symptoms:**
+- Page loads but no styling
+- Drag-and-drop doesn't work
+- Browser console shows 403 errors for /static/js/app.js or /static/css/style.css
+
+**Cause:** Nginx can't access files in /home/ubuntu/ directory
+
+**Fix:**
+```bash
+# Add www-data to ubuntu group
+sudo usermod -a -G ubuntu www-data
+
+# Make home directory group-readable
+sudo chmod 755 /home/ubuntu
+
+# Restart Nginx
+sudo systemctl restart nginx
+
+# Test
+curl -I http://localhost/static/js/app.js
+# Should return: HTTP/1.1 200 OK
+```
+
+**Note:** The deployment script now does this automatically, but if you deployed manually or encounter this issue, use the fix above.
+
 ---
 
 ## Monitoring
