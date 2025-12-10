@@ -77,3 +77,8 @@ complex_*.png
 flag_*.png
 without.png
 preview.png
+
+# AWS deployment
+.aws-instance-info
+*.pem
+gs-convert-key.*
