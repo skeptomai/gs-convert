@@ -84,10 +84,12 @@ fi
 echo "📚 Installing dependencies..."
 source .venv/bin/activate
 
-# Ensure pip is available in venv (uv sometimes doesn't include it)
-if ! command -v pip &> /dev/null; then
-    echo "⚠️  pip not found in venv, installing pip..."
-    "$UV_BIN" pip install pip
+# Ensure pip is available in venv
+# uv venv doesn't include pip by default, need to install it properly
+if ! python -m pip --version &> /dev/null; then
+    echo "⚠️  pip not found in venv, installing via ensurepip..."
+    python -m ensurepip --upgrade
+    python -m pip install --upgrade pip
     echo ""
 fi
 
@@ -98,10 +100,10 @@ read -p "Install Web UI? [y/N]: " install_ui
 
 if [[ "$install_ui" =~ ^[Yy]$ ]]; then
     echo "Installing with dev and UI dependencies..."
-    "$UV_BIN" pip install -e ".[dev,ui]"
+    python -m pip install -e ".[dev,ui]"
 else
     echo "Installing with dev dependencies only..."
-    "$UV_BIN" pip install -e ".[dev]"
+    python -m pip install -e ".[dev]"
 fi
 
 echo ""
