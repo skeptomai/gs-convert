@@ -461,3 +461,25 @@ footer {
         padding: var(--spacing-lg);
     }
 }
+
+/* Footer attribution */
+footer .attribution {
+    margin-top: var(--spacing-md);
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+
+footer .attribution a {
+    color: var(--primary-color);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.2s ease;
+}
+
+footer .attribution a:hover {
+    border-bottom-color: var(--primary-color);
+}
+
+footer .tech-specs {
+    margin-bottom: var(--spacing-sm);
+}
